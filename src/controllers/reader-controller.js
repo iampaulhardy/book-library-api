@@ -10,16 +10,16 @@ exports.list = (_, res) => {
 
 exports.getReaderById = (req, res) => {
     const { id } = req.params;
-    Reader.findByPk(id).then(reader => {
-        if (!reader) {
+    Reader.findByPk(id).then(result => {
+        if (!result) {
             res.status(404).json({ error: 'The reader could not be found.' })
         } else {
-            res.status(200).json(reader); 
+            res.status(200).json(result); 
         }
     });
 }
 
-exports.patchById = (req, res) => {
+exports.patchReaderById = (req, res) => {
     const { id } = req.params;
     Reader.update(req.body, { where: { id } }).then(([rowsUpdated]) => {
         if (!rowsUpdated) {
@@ -30,13 +30,13 @@ exports.patchById = (req, res) => {
     });
 };
 
-exports.deleteById = (req, res) => {
+exports.deleteReaderById = (req, res) => {
     const { id } = req.params;
-    Reader.destroy({ where: { id } }).then(reader => {
-        if (!reader) {
+    Reader.destroy({ where: { id } }).then(result => {
+        if (!result) {
             res.status(404).json({ error: 'The reader could not be found.'});
         } else {
-            res.status(204).json(reader);
+            res.status(204).json(result);
         }
     })
 }

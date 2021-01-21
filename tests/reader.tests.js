@@ -25,13 +25,15 @@ describe('/readers', () => {
         it('creates a new reader in the database', async () => {
             const response = await request(app).post('/readers').send({
                 name: 'Paul Hardy',
-                email: 'paul.hardy@abc.com'
+                email: 'paul.hardy@abc.com',
+                password: 'badpassword'
             });
             await expect(response.status).to.equal(201);
             expect(response.body.name).to.equal('Paul Hardy');
             const insertedReader = await Reader.findByPk(response.body.id, { raw: true });
             expect(insertedReader.name).to.equal('Paul Hardy');
             expect(insertedReader.email).to.equal('paul.hardy@abc.com');
+            expect(insertedReader.password).to.equal('badpassword')
         });
     });
 
@@ -39,9 +41,9 @@ describe('/readers', () => {
         let readers;
         beforeEach((done) => {
             Promise.all([
-                Reader.create({ name: 'Donald Trump', email: 'donald.trump@usa.com' }),
-                Reader.create({ name: 'Boris Johnson', email: 'boris.johnson@uk.com' }),
-                Reader.create({ name: 'Kim Jong-un', email: 'kim.jong-un@nk.com' })
+                Reader.create({ name: 'Donald Trump', email: 'donald.trump@usa.com', password: 'password1' }),
+                Reader.create({ name: 'Boris Johnson', email: 'boris.johnson@uk.com', password: 'password2' }),
+                Reader.create({ name: 'Kim Jong-un', email: 'kim.jong-un@nk.com' , password: 'password3' })
             ]).then((result) => {
                 readers = result;
                 done()
@@ -59,6 +61,7 @@ describe('/readers', () => {
                             const expected = readers.find((a) => a.id === reader.id);
                             expect(reader.name).to.equal(expected.name);
                             expect(reader.email).to.equal(expected.email);
+                            expect(reader.password).to.equal(expected.password);
                         });
                         done();
                     });
@@ -74,6 +77,7 @@ describe('/readers', () => {
                         expect(res.status).to.equal(200)
                         expect(res.body.name).to.equal(reader.name)
                         expect(res.body.email).to.equal(reader.email)
+                        expect(res.body.password).to.equal(reader.password)
                         done();
                     });
             });
@@ -113,6 +117,20 @@ describe('/readers', () => {
                         expect(res.status).to.equal(200);
                         Reader.findByPk(reader.id, { raw: true }).then((updatedReader) => {
                             expect(updatedReader.email).to.equal('margret.thatcher@uk.com');
+                            done();
+                        });
+                    });
+            });
+
+            it ('updates reader password by id', (done) => {
+                const reader = readers[0];
+                request(app)
+                    .patch(`/readers/${reader.id}`)
+                    .send({ password: 'goodpassword' })
+                    .then((res) => {
+                        expect(res.status).to.equal(200);
+                        Reader.findByPk(reader.id, { raw: true }).then((updatedReader) => {
+                            expect(updatedReader.password).to.equal('goodpassword');
                             done();
                         });
                     });
